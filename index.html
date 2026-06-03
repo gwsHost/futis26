@@ -10,5 +10,43 @@
 <body>
     <h1>Hello World! jee</h1>
     <p>Tämä on ensimmäinen sivuni 🎉</p>
+
+    <div>
+        <span id="kello">00:00:00</span><br><br>
+        <button onclick="kaynnista()">Käynnistä</button>
+        <button onclick="pysayta()">Pysäytä</button>
+        <button onclick="nollaa()">Nollaa</button>
+    </div>
+
+    <script>
+        var sekunnit = 0;
+        var ajastin = null;
+
+        function paivita() {
+            sekunnit++;
+            var h = Math.floor(sekunnit / 3600);
+            var m = Math.floor((sekunnit % 3600) / 60);
+            var s = sekunnit % 60;
+            document.getElementById('kello').textContent =
+                String(h).padStart(2, '0') + ':' +
+                String(m).padStart(2, '0') + ':' +
+                String(s).padStart(2, '0');
+        }
+
+        function kaynnista() {
+            if (!ajastin) ajastin = setInterval(paivita, 1000);
+        }
+
+        function pysayta() {
+            clearInterval(ajastin);
+            ajastin = null;
+        }
+
+        function nollaa() {
+            pysayta();
+            sekunnit = 0;
+            document.getElementById('kello').textContent = '00:00:00';
+        }
+    </script>
 </body>
 </html>
