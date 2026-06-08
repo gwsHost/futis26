@@ -684,7 +684,16 @@ function generateExcel(btn) {
   XLSX.utils.book_append_sheet(wb, ws, "Veikkaukset");
 
   const safeName = name.replace(/[^a-zA-Z0-9äöåÄÖÅ]/g, '_');
-  XLSX.writeFile(wb, `WC2026_veikkaus_${safeName}.xlsx`);
+  const filename = `WC2026_veikkaus_${safeName}.xlsx`;
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    // iOS Safari ei tue suoraa latausta – avataan data-URI:na uudessa välilehdessä
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+    window.open('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + wbout);
+  } else {
+    XLSX.writeFile(wb, filename);
+  }
 
   // Näytä valmis-ruutu
   document.getElementById('formView').style.display = 'none';
