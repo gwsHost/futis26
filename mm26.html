@@ -74,6 +74,11 @@
     color: #fff;
   }
   .btn-random:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-heikki {
+    background: linear-gradient(135deg, #0ea5e9, #0369a1);
+    color: #fff;
+  }
+  .btn-heikki:hover { opacity: 0.9; transform: translateY(-1px); }
 
   .name-section {
     background: var(--card);
@@ -379,6 +384,7 @@
     </div>
     <div class="random-bar">
       <button class="btn btn-random" onclick="randomizePicks()">🎲 Arvo vastaukset</button>
+      <button class="btn btn-heikki" onclick="heikkiRivi()" style="margin-left:0.5rem">📊 Heikin rivi</button>
     </div>
     <form id="betForm"></form>
   </div>
@@ -728,6 +734,32 @@ function showDone(name) {
   document.getElementById('formView').style.display = 'none';
   document.getElementById('doneName').textContent = name + ' – tiedosto on tallennettu.';
   document.getElementById('doneView').classList.add('show');
+}
+
+const FIFA_RANKINGS = {
+  "France":1,"Spain":2,"Argentina":3,"England":4,"Portugal":5,
+  "Brazil":6,"Netherlands":7,"Morocco":8,"Belgium":9,"Germany":10,
+  "Croatia":11,"Colombia":13,"Mexico":14,"Senegal":15,"USA":16,
+  "Uruguay":17,"Japan":18,"Switzerland":19,"IR Iran":21,"Türkiye":22,
+  "Ecuador":23,"Austria":24,"South Korea":25,"Australia":27,"Algeria":28,
+  "Egypt":29,"Canada":30,"Norway":31,"Côte d'Ivoire":33,"Panama":34,
+  "Sweden":38,"Czechia":39,"Paraguay":40,"Scotland":42,"Congo DR":45,
+  "Tunisia":46,"Uzbekistan":50,"Qatar":55,"Iraq":56,"South Africa":60,
+  "Saudi Arabia":61,"Jordan":63,"Bosnia-Herzegovina":64,"Cabo Verde":67,
+  "Ghana":73,"Curacao":82,"Haiti":83,"New Zealand":85
+};
+
+function heikkiRivi() {
+  MATCHES.forEach(m => {
+    if (m.n >= 73) return; // ei jatko-otteluihin
+    const hr = FIFA_RANKINGS[m.home];
+    const ar = FIFA_RANKINGS[m.away];
+    if (!hr || !ar) return;
+    const diff = Math.abs(hr - ar);
+    const pick = diff <= 10 ? 'X' : (hr < ar ? '1' : '2');
+    const radio = document.querySelector(`input[name="m${m.n}"][value="${pick}"]`);
+    if (radio) { radio.checked = true; onPick(m.n, pick); }
+  });
 }
 
 function randomizePicks() {
