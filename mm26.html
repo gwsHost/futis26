@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FIFA World Cup 2026 – Veikkaus</title>
+<title>FIFA World Cup 2026 – Omat veikkaukset</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #0a0e1a;
@@ -105,16 +106,6 @@
     font-weight: 700;
     color: var(--gold);
   }
-  .phase-badge {
-    background: var(--gold);
-    color: #000;
-    font-size: 0.7rem;
-    font-weight: 800;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
 
   .group-block { margin-bottom: 1.5rem; }
   .group-label {
@@ -140,7 +131,6 @@
     transition: border-color 0.2s, background 0.2s;
   }
   .match-card:hover { border-color: var(--accent); background: #1e2d45; }
-  .match-card.picked { border-color: var(--border); }
   .match-card.picked-1 { border-left: 3px solid var(--win1); }
   .match-card.picked-X { border-left: 3px solid var(--winX); }
   .match-card.picked-2 { border-left: 3px solid var(--win2); }
@@ -174,7 +164,6 @@
     gap: 0.75rem;
     flex-wrap: wrap;
   }
-  .match-meta span::before { margin-right: 0.2rem; }
 
   .bet-group {
     display: flex;
@@ -259,13 +248,12 @@
     border: 1.5px solid var(--accent);
   }
   .btn-preview:hover { background: var(--accent); color: #fff; }
-  .btn-submit {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+  .btn-excel {
+    background: linear-gradient(135deg, #16a34a, #15803d);
     color: #fff;
   }
-  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-excel:hover { opacity: 0.9; transform: translateY(-1px); }
 
-  /* Preview modal */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -335,21 +323,30 @@
     justify-content: flex-end;
   }
 
-  /* Submitted view */
-  .submitted-view {
+  .done-view {
     display: none;
     text-align: center;
     padding: 3rem 1rem;
   }
-  .submitted-view.show { display: block; }
-  .submitted-view .icon { font-size: 4rem; margin-bottom: 1rem; }
-  .submitted-view h2 { font-size: 1.8rem; font-weight: 800; color: var(--win1); margin-bottom: 0.5rem; }
-  .submitted-view p { color: var(--muted); }
+  .done-view.show { display: block; }
+  .done-view .icon { font-size: 4rem; margin-bottom: 1rem; }
+  .done-view h2 { font-size: 1.8rem; font-weight: 800; color: var(--win1); margin-bottom: 0.5rem; }
+  .done-view p { color: var(--muted); margin-bottom: 1.5rem; }
+  .done-view .btn-again {
+    background: var(--surface);
+    color: var(--text);
+    border: 1.5px solid var(--accent);
+    padding: 0.75rem 1.8rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .done-view .btn-again:hover { background: var(--accent); color: #fff; }
 
   @media (max-width: 600px) {
-    .match-card { grid-template-columns: 2rem 1fr; gap: 0.5rem; }
+    .match-card { grid-template-columns: 2rem 1fr; grid-template-rows: auto auto; gap: 0.5rem; }
     .bet-group { grid-column: 1 / -1; justify-content: flex-end; }
-    .match-card { grid-template-columns: 2rem 1fr; grid-template-rows: auto auto; }
   }
 </style>
 </head>
@@ -357,7 +354,7 @@
 
 <header>
   <h1>FIFA World Cup 2026</h1>
-  <p>Veikkauskilpailu – ennusta kaikkien 104 ottelun tulos</p>
+  <p>Täytä veikkauksesi ja lataa ne Excel-tiedostona</p>
 </header>
 
 <main>
@@ -366,16 +363,14 @@
       <label for="playerName">Nimesi</label>
       <input type="text" id="playerName" placeholder="Kirjoita nimesi tähän..." autocomplete="off">
     </div>
-
-    <form id="betForm">
-      <!-- Matches injected by JS -->
-    </form>
+    <form id="betForm"></form>
   </div>
 
-  <div class="submitted-view" id="submittedView">
-    <div class="icon">🏆</div>
-    <h2>Veikkauksesi on lähetetty!</h2>
-    <p id="submittedName"></p>
+  <div class="done-view" id="doneView">
+    <div class="icon">📥</div>
+    <h2>Excel-tiedosto ladattu!</h2>
+    <p id="doneName"></p>
+    <button class="btn-again" onclick="location.reload()">Tee uudet veikkaukset</button>
   </div>
 </main>
 
@@ -383,7 +378,7 @@
   <div class="progress-info" id="progressInfo">0 / 104 veikkausta tehty</div>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
   <button class="btn btn-preview" onclick="openPreview()">Esikatsele vastaukset</button>
-  <button class="btn btn-submit" onclick="submitForm(this)">Lähetä veikkaukset</button>
+  <button class="btn btn-excel" onclick="generateExcel(this)">📥 Muodosta Excel</button>
 </div>
 
 <!-- Preview Modal -->
@@ -409,7 +404,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-preview" onclick="closePreview()">Muokkaa</button>
-      <button class="btn btn-submit" onclick="closePreview(); submitForm(this)">Lähetä</button>
+      <button class="btn btn-excel" onclick="closePreview(); generateExcel(this)">📥 Muodosta Excel</button>
     </div>
   </div>
 </div>
@@ -559,8 +554,7 @@ function buildForm() {
     phaseDiv.innerHTML = `<div class="phase-title"><span style="font-size:1.3rem">${PHASE_ICONS[phase]||'🎯'}</span><h2>${phase}</h2></div>`;
 
     const groups = byPhase[phase];
-    const groupKeys = Object.keys(groups).sort();
-    groupKeys.forEach(gk => {
+    Object.keys(groups).sort().forEach(gk => {
       const gDiv = document.createElement('div');
       gDiv.className = 'group-block';
       if (gk !== '_') gDiv.innerHTML = `<div class="group-label">Lohko ${gk}</div>`;
@@ -604,7 +598,7 @@ function buildForm() {
 
 function onPick(n, val) {
   const card = document.getElementById('card-' + n);
-  card.className = 'match-card picked picked-' + val;
+  card.className = 'match-card picked-' + val;
   updateProgress();
 }
 
@@ -642,44 +636,61 @@ function closePreview() {
   document.getElementById('previewModal').classList.remove('open');
 }
 
-async function submitForm(btn) {
+function generateExcel(btn) {
   const name = document.getElementById('playerName').value.trim();
   if (!name) { alert('Kirjoita ensin nimesi!'); document.getElementById('playerName').focus(); return; }
+
   let missing = 0;
   MATCHES.forEach(m => { if (!document.querySelector(`input[name="m${m.n}"]:checked`)) missing++; });
   if (missing > 0) {
-    if (!confirm(`Sinulla on ${missing} veikkausta tekemättä. Haluatko silti lähettää?`)) return;
+    if (!confirm(`Sinulla on ${missing} veikkausta tekemättä. Haluatko silti luoda Excel-tiedoston?`)) return;
   }
 
-  // Tasainen rakenne Formspreen dashboardia ja CSV-vientiä varten
-  const payload = { name };
+  // Rakenna taulukkodata
+  const rows = [
+    ["Ottelu #", "Vaihe", "Lohko", "Päivämäärä", "Klo", "Pelipaikka", "Koti", "Vieras", "Veikkaus"]
+  ];
   MATCHES.forEach(m => {
     const checked = document.querySelector(`input[name="m${m.n}"]:checked`);
-    payload[`ottelu_${m.n}_${m.home}_${m.away}`] = checked ? checked.value : "";
+    rows.push([
+      m.n,
+      m.phase,
+      m.group || "-",
+      m.date,
+      m.time,
+      m.venue,
+      m.home,
+      m.away,
+      checked ? checked.value : ""
+    ]);
   });
 
-  const SCRIPT_URL = "https://formspree.io/f/SINUN_FORM_ID";
+  const ws = XLSX.utils.aoa_to_sheet(rows);
 
-  const originalLabel = btn.textContent;
-  btn.textContent = 'Lähetetään…';
-  btn.disabled = true;
+  // Sarakeleveydet
+  ws['!cols'] = [
+    {wch: 9},   // Ottelu #
+    {wch: 14},  // Vaihe
+    {wch: 7},   // Lohko
+    {wch: 13},  // Päivämäärä
+    {wch: 6},   // Klo
+    {wch: 24},  // Pelipaikka
+    {wch: 22},  // Koti
+    {wch: 22},  // Vieras
+    {wch: 9},   // Veikkaus
+  ];
 
-  try {
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" }
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    document.getElementById('formView').style.display = 'none';
-    document.getElementById('actionBar').style.display = 'none';
-    document.getElementById('submittedName').textContent = name + ' – kiitos veikkauksistasi!';
-    document.getElementById('submittedView').classList.add('show');
-  } catch(err) {
-    alert('Lähetys epäonnistui, yritä uudelleen.');
-    btn.textContent = originalLabel;
-    btn.disabled = false;
-  }
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Veikkaukset");
+
+  const safeName = name.replace(/[^a-zA-Z0-9äöåÄÖÅ]/g, '_');
+  XLSX.writeFile(wb, `WC2026_veikkaus_${safeName}.xlsx`);
+
+  // Näytä valmis-ruutu
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('actionBar').style.display = 'none';
+  document.getElementById('doneName').textContent = name + ' – tiedosto on tallennettu latauksiin.';
+  document.getElementById('doneView').classList.add('show');
 }
 
 document.getElementById('previewModal').addEventListener('click', function(e) {
