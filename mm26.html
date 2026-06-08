@@ -636,7 +636,7 @@ function closePreview() {
   document.getElementById('previewModal').classList.remove('open');
 }
 
-function generateExcel(btn) {
+async function generateExcel(btn) {
   const name = document.getElementById('playerName').value.trim();
   if (!name) { alert('Kirjoita ensin nimesi!'); document.getElementById('playerName').focus(); return; }
 
@@ -666,18 +666,9 @@ function generateExcel(btn) {
   });
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  // Sarakeleveydet
   ws['!cols'] = [
-    {wch: 9},   // Ottelu #
-    {wch: 14},  // Vaihe
-    {wch: 7},   // Lohko
-    {wch: 13},  // Päivämäärä
-    {wch: 6},   // Klo
-    {wch: 24},  // Pelipaikka
-    {wch: 22},  // Koti
-    {wch: 22},  // Vieras
-    {wch: 9},   // Veikkaus
+    {wch: 9}, {wch: 14}, {wch: 7}, {wch: 13},
+    {wch: 6}, {wch: 24}, {wch: 22}, {wch: 22}, {wch: 9},
   ];
 
   const wb = XLSX.utils.book_new();
@@ -686,19 +677,40 @@ function generateExcel(btn) {
   const safeName = name.replace(/[^a-zA-Z0-9äöåÄÖÅ]/g, '_');
   const filename = `WC2026_veikkaus_${safeName}.xlsx`;
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  if (isIOS) {
-    // iOS Safari ei tue suoraa latausta – avataan data-URI:na uudessa välilehdessä
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-    window.open('data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + wbout);
-  } else {
-    XLSX.writeFile(wb, filename);
+  // Luo Blob kaikille alustoille
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+  // iOS 15+: käytä Web Share API:a → avaa jakoikkuna (Tallenna Tiedostoihin / Numbers)
+  if (navigator.share && navigator.canShare) {
+    const file = new File([blob], filename, { type: blob.type });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'WC2026 veikkaukset' });
+      } catch (e) {
+        if (e.name === 'AbortError') return; // käyttäjä sulki jakoikkunan
+      }
+      showDone(name);
+      return;
+    }
   }
 
-  // Näytä valmis-ruutu
+  // Desktop ja Android: normaali lataus
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showDone(name);
+}
+
+function showDone(name) {
   document.getElementById('formView').style.display = 'none';
   document.getElementById('actionBar').style.display = 'none';
-  document.getElementById('doneName').textContent = name + ' – tiedosto on tallennettu latauksiin.';
+  document.getElementById('doneName').textContent = name + ' – tiedosto on tallennettu.';
   document.getElementById('doneView').classList.add('show');
 }
 
