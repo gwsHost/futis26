@@ -62,7 +62,18 @@
   }
   header p { color: var(--muted); margin-top: 0.4rem; font-size: 1rem; }
 
-  main { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+  main { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 9rem; }
+
+  .random-bar {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-random {
+    background: linear-gradient(135deg, var(--accent2), #6d28d9);
+    color: #fff;
+  }
+  .btn-random:hover { opacity: 0.9; transform: translateY(-1px); }
 
   .name-section {
     background: var(--card);
@@ -198,8 +209,11 @@
   .bet-label input:checked ~ .bet-btn.btn-2 { background: var(--win2); border-color: var(--win2); color: #fff; }
 
   .action-bar {
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     background: rgba(10,14,26,0.95);
     backdrop-filter: blur(8px);
     border-top: 1px solid var(--border);
@@ -362,6 +376,9 @@
     <div class="name-section">
       <label for="playerName">Nimesi</label>
       <input type="text" id="playerName" placeholder="Kirjoita nimesi tähän..." autocomplete="off">
+    </div>
+    <div class="random-bar">
+      <button class="btn btn-random" onclick="randomizePicks()">🎲 Arvo vastaukset</button>
     </div>
     <form id="betForm"></form>
   </div>
@@ -709,9 +726,17 @@ async function generateExcel(btn) {
 
 function showDone(name) {
   document.getElementById('formView').style.display = 'none';
-  document.getElementById('actionBar').style.display = 'none';
   document.getElementById('doneName').textContent = name + ' – tiedosto on tallennettu.';
   document.getElementById('doneView').classList.add('show');
+}
+
+function randomizePicks() {
+  const options = ['1', 'X', '2'];
+  MATCHES.forEach(m => {
+    const val = options[Math.floor(Math.random() * 3)];
+    const radio = document.querySelector(`input[name="m${m.n}"][value="${val}"]`);
+    if (radio) { radio.checked = true; onPick(m.n, val); }
+  });
 }
 
 document.getElementById('previewModal').addEventListener('click', function(e) {
