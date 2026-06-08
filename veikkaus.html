@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 – Veikkaus</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #131929;
+    --card: #1a2236;
+    --border: #2a3a5c;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --gold: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --win1: #22c55e;
+    --winX: #eab308;
+    --win2: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 2rem 1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '⚽';
+    position: absolute;
+    font-size: 8rem;
+    opacity: 0.05;
+    top: -1rem;
+    left: 5%;
+  }
+  header::after {
+    content: '🏆';
+    position: absolute;
+    font-size: 8rem;
+    opacity: 0.05;
+    top: -1rem;
+    right: 5%;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+  header p { color: var(--muted); margin-top: 0.4rem; font-size: 1rem; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+  .name-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .name-section label {
+    display: block;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+  }
+  .name-section input {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .name-section input:focus { border-color: var(--accent); }
+  .name-section input::placeholder { color: var(--muted); }
+
+  .phase-block { margin-bottom: 2.5rem; }
+  .phase-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .phase-title h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .phase-badge {
+    background: var(--gold);
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .group-block { margin-bottom: 1.5rem; }
+  .group-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+  }
+
+  .match-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.5rem;
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .match-card:hover { border-color: var(--accent); background: #1e2d45; }
+  .match-card.picked { border-color: var(--border); }
+  .match-card.picked-1 { border-left: 3px solid var(--win1); }
+  .match-card.picked-X { border-left: 3px solid var(--winX); }
+  .match-card.picked-2 { border-left: 3px solid var(--win2); }
+
+  .match-num {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: center;
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 0.3rem 0;
+  }
+  .match-info { min-width: 0; }
+  .match-teams {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+    flex-wrap: wrap;
+  }
+  .team-home { color: var(--text); }
+  .vs { color: var(--muted); font-size: 0.8rem; font-weight: 400; }
+  .team-away { color: var(--text); }
+  .match-meta {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .match-meta span::before { margin-right: 0.2rem; }
+
+  .bet-group {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  .bet-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+  }
+  .bet-label input[type=radio] { display: none; }
+  .bet-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .bet-label:hover .bet-btn { border-color: var(--accent); color: var(--text); }
+  .bet-label input:checked ~ .bet-btn.btn-1 { background: var(--win1); border-color: var(--win1); color: #fff; }
+  .bet-label input:checked ~ .bet-btn.btn-X { background: var(--winX); border-color: var(--winX); color: #000; }
+  .bet-label input:checked ~ .bet-btn.btn-2 { background: var(--win2); border-color: var(--win2); color: #fff; }
+
+  .action-bar {
+    position: sticky;
+    bottom: 0;
+    background: rgba(10,14,26,0.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+    padding: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .progress-info {
+    width: 100%;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+  .progress-bar {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 0.5rem;
+    height: 4px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 999px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .btn {
+    padding: 0.75rem 1.8rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .btn-preview {
+    background: var(--surface);
+    color: var(--text);
+    border: 1.5px solid var(--accent);
+  }
+  .btn-preview:hover { background: var(--accent); color: #fff; }
+  .btn-submit {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+  }
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* Preview modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h3 { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 1.5rem; overflow-y: auto; }
+  .modal-name { font-size: 1.1rem; margin-bottom: 1rem; color: var(--muted); }
+  .modal-name strong { color: var(--text); }
+  .preview-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .preview-table th {
+    text-align: left;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-table td { padding: 0.35rem 0.6rem; border-bottom: 1px solid rgba(42,58,92,0.5); }
+  .preview-table tr:hover td { background: var(--surface); }
+  .preview-pick {
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.85rem;
+  }
+  .pick-1 { background: var(--win1); color: #fff; }
+  .pick-X { background: var(--winX); color: #000; }
+  .pick-2 { background: var(--win2); color: #fff; }
+  .pick-none { color: var(--win2); font-style: italic; }
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  /* Submitted view */
+  .submitted-view {
+    display: none;
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+  .submitted-view.show { display: block; }
+  .submitted-view .icon { font-size: 4rem; margin-bottom: 1rem; }
+  .submitted-view h2 { font-size: 1.8rem; font-weight: 800; color: var(--win1); margin-bottom: 0.5rem; }
+  .submitted-view p { color: var(--muted); }
+
+  @media (max-width: 600px) {
+    .match-card { grid-template-columns: 2rem 1fr; gap: 0.5rem; }
+    .bet-group { grid-column: 1 / -1; justify-content: flex-end; }
+    .match-card { grid-template-columns: 2rem 1fr; grid-template-rows: auto auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FIFA World Cup 2026</h1>
+  <p>Veikkauskilpailu – ennusta kaikkien 104 ottelun tulos</p>
+</header>
+
+<main>
+  <div id="formView">
+    <div class="name-section">
+      <label for="playerName">Nimesi</label>
+      <input type="text" id="playerName" placeholder="Kirjoita nimesi tähän..." autocomplete="off">
+    </div>
+
+    <form id="betForm">
+      <!-- Matches injected by JS -->
+    </form>
+  </div>
+
+  <div class="submitted-view" id="submittedView">
+    <div class="icon">🏆</div>
+    <h2>Veikkauksesi on lähetetty!</h2>
+    <p id="submittedName"></p>
+  </div>
+</main>
+
+<div class="action-bar" id="actionBar">
+  <div class="progress-info" id="progressInfo">0 / 104 veikkausta tehty</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <button class="btn btn-preview" onclick="openPreview()">Esikatsele vastaukset</button>
+  <button class="btn btn-submit" onclick="submitForm()">Lähetä veikkaukset</button>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Esikatselu – veikkauksesi</h3>
+      <button class="modal-close" onclick="closePreview()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-name">Veikkaaja: <strong id="previewName">–</strong></div>
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ottelu</th>
+            <th>Pvm</th>
+            <th>Veto</th>
+          </tr>
+        </thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-preview" onclick="closePreview()">Muokkaa</button>
+      <button class="btn btn-submit" onclick="closePreview(); submitForm()">Lähetä</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MATCHES = [
+  // Lohkovaihe A
+  {n:1,phase:"Lohkovaihe",group:"A",date:"11.06.2026",time:"15:00",venue:"Mexico City",home:"Mexico",away:"South Africa"},
+  {n:2,phase:"Lohkovaihe",group:"A",date:"11.06.2026",time:"22:00",venue:"Guadalajara",home:"South Korea",away:"Czechia"},
+  {n:3,phase:"Lohkovaihe",group:"A",date:"18.06.2026",time:"12:00",venue:"Atlanta",home:"Czechia",away:"South Africa"},
+  {n:4,phase:"Lohkovaihe",group:"A",date:"18.06.2026",time:"21:00",venue:"Guadalajara",home:"Mexico",away:"South Korea"},
+  {n:5,phase:"Lohkovaihe",group:"A",date:"24.06.2026",time:"21:00",venue:"Mexico City",home:"Czechia",away:"Mexico"},
+  {n:6,phase:"Lohkovaihe",group:"A",date:"24.06.2026",time:"21:00",venue:"Monterrey",home:"South Africa",away:"South Korea"},
+  // Lohkovaihe B
+  {n:7,phase:"Lohkovaihe",group:"B",date:"12.06.2026",time:"15:00",venue:"Toronto",home:"Canada",away:"Bosnia-Herzegovina"},
+  {n:8,phase:"Lohkovaihe",group:"B",date:"13.06.2026",time:"15:00",venue:"San Francisco Bay Area",home:"Qatar",away:"Switzerland"},
+  {n:9,phase:"Lohkovaihe",group:"B",date:"18.06.2026",time:"15:00",venue:"Los Angeles",home:"Switzerland",away:"Bosnia-Herzegovina"},
+  {n:10,phase:"Lohkovaihe",group:"B",date:"18.06.2026",time:"18:00",venue:"Vancouver",home:"Canada",away:"Qatar"},
+  {n:11,phase:"Lohkovaihe",group:"B",date:"24.06.2026",time:"15:00",venue:"Vancouver",home:"Switzerland",away:"Canada"},
+  {n:12,phase:"Lohkovaihe",group:"B",date:"24.06.2026",time:"15:00",venue:"Seattle",home:"Bosnia-Herzegovina",away:"Qatar"},
+  // Lohkovaihe C
+  {n:13,phase:"Lohkovaihe",group:"C",date:"13.06.2026",time:"18:00",venue:"New York / New Jersey",home:"Brazil",away:"Morocco"},
+  {n:14,phase:"Lohkovaihe",group:"C",date:"13.06.2026",time:"21:00",venue:"Boston",home:"Haiti",away:"Scotland"},
+  {n:15,phase:"Lohkovaihe",group:"C",date:"19.06.2026",time:"18:00",venue:"Boston",home:"Scotland",away:"Morocco"},
+  {n:16,phase:"Lohkovaihe",group:"C",date:"19.06.2026",time:"21:00",venue:"Philadelphia",home:"Brazil",away:"Haiti"},
+  {n:17,phase:"Lohkovaihe",group:"C",date:"24.06.2026",time:"18:00",venue:"Miami",home:"Scotland",away:"Brazil"},
+  {n:18,phase:"Lohkovaihe",group:"C",date:"24.06.2026",time:"18:00",venue:"Atlanta",home:"Morocco",away:"Haiti"},
+  // Lohkovaihe D
+  {n:19,phase:"Lohkovaihe",group:"D",date:"12.06.2026",time:"21:00",venue:"Los Angeles",home:"USA",away:"Paraguay"},
+  {n:20,phase:"Lohkovaihe",group:"D",date:"13.06.2026",time:"00:00",venue:"Vancouver",home:"Australia",away:"Türkiye"},
+  {n:21,phase:"Lohkovaihe",group:"D",date:"19.06.2026",time:"15:00",venue:"Seattle",home:"USA",away:"Australia"},
+  {n:22,phase:"Lohkovaihe",group:"D",date:"19.06.2026",time:"00:00",venue:"San Francisco Bay Area",home:"Türkiye",away:"Paraguay"},
+  {n:23,phase:"Lohkovaihe",group:"D",date:"25.06.2026",time:"22:00",venue:"Los Angeles",home:"Türkiye",away:"USA"},
+  {n:24,phase:"Lohkovaihe",group:"D",date:"25.06.2026",time:"22:00",venue:"San Francisco Bay Area",home:"Paraguay",away:"Australia"},
+  // Lohkovaihe E
+  {n:25,phase:"Lohkovaihe",group:"E",date:"14.06.2026",time:"13:00",venue:"Houston",home:"Germany",away:"Curacao"},
+  {n:26,phase:"Lohkovaihe",group:"E",date:"14.06.2026",time:"19:00",venue:"Philadelphia",home:"Côte d'Ivoire",away:"Ecuador"},
+  {n:27,phase:"Lohkovaihe",group:"E",date:"20.06.2026",time:"16:00",venue:"Toronto",home:"Germany",away:"Côte d'Ivoire"},
+  {n:28,phase:"Lohkovaihe",group:"E",date:"20.06.2026",time:"20:00",venue:"Kansas City",home:"Ecuador",away:"Curacao"},
+  {n:29,phase:"Lohkovaihe",group:"E",date:"25.06.2026",time:"16:00",venue:"Philadelphia",home:"Curacao",away:"Côte d'Ivoire"},
+  {n:30,phase:"Lohkovaihe",group:"E",date:"25.06.2026",time:"16:00",venue:"New York / New Jersey",home:"Ecuador",away:"Germany"},
+  // Lohkovaihe F
+  {n:31,phase:"Lohkovaihe",group:"F",date:"14.06.2026",time:"16:00",venue:"Dallas",home:"Netherlands",away:"Japan"},
+  {n:32,phase:"Lohkovaihe",group:"F",date:"14.06.2026",time:"22:00",venue:"Monterrey",home:"Sweden",away:"Tunisia"},
+  {n:33,phase:"Lohkovaihe",group:"F",date:"20.06.2026",time:"13:00",venue:"Houston",home:"Netherlands",away:"Sweden"},
+  {n:34,phase:"Lohkovaihe",group:"F",date:"20.06.2026",time:"00:00",venue:"Monterrey",home:"Tunisia",away:"Japan"},
+  {n:35,phase:"Lohkovaihe",group:"F",date:"25.06.2026",time:"19:00",venue:"Dallas",home:"Japan",away:"Sweden"},
+  {n:36,phase:"Lohkovaihe",group:"F",date:"25.06.2026",time:"19:00",venue:"Kansas City",home:"Tunisia",away:"Netherlands"},
+  // Lohkovaihe G
+  {n:37,phase:"Lohkovaihe",group:"G",date:"15.06.2026",time:"15:00",venue:"Seattle",home:"Belgium",away:"Egypt"},
+  {n:38,phase:"Lohkovaihe",group:"G",date:"15.06.2026",time:"21:00",venue:"Los Angeles",home:"IR Iran",away:"New Zealand"},
+  {n:39,phase:"Lohkovaihe",group:"G",date:"21.06.2026",time:"15:00",venue:"Los Angeles",home:"Belgium",away:"IR Iran"},
+  {n:40,phase:"Lohkovaihe",group:"G",date:"21.06.2026",time:"21:00",venue:"Vancouver",home:"New Zealand",away:"Egypt"},
+  {n:41,phase:"Lohkovaihe",group:"G",date:"26.06.2026",time:"23:00",venue:"Seattle",home:"Egypt",away:"IR Iran"},
+  {n:42,phase:"Lohkovaihe",group:"G",date:"26.06.2026",time:"23:00",venue:"Vancouver",home:"New Zealand",away:"Belgium"},
+  // Lohkovaihe H
+  {n:43,phase:"Lohkovaihe",group:"H",date:"15.06.2026",time:"12:00",venue:"Atlanta",home:"Spain",away:"Cabo Verde"},
+  {n:44,phase:"Lohkovaihe",group:"H",date:"15.06.2026",time:"18:00",venue:"Miami",home:"Saudi Arabia",away:"Uruguay"},
+  {n:45,phase:"Lohkovaihe",group:"H",date:"21.06.2026",time:"12:00",venue:"Atlanta",home:"Spain",away:"Saudi Arabia"},
+  {n:46,phase:"Lohkovaihe",group:"H",date:"21.06.2026",time:"18:00",venue:"Miami",home:"Uruguay",away:"Cabo Verde"},
+  {n:47,phase:"Lohkovaihe",group:"H",date:"26.06.2026",time:"20:00",venue:"Houston",home:"Cabo Verde",away:"Saudi Arabia"},
+  {n:48,phase:"Lohkovaihe",group:"H",date:"26.06.2026",time:"20:00",venue:"Guadalajara",home:"Uruguay",away:"Spain"},
+  // Lohkovaihe I
+  {n:49,phase:"Lohkovaihe",group:"I",date:"16.06.2026",time:"15:00",venue:"New York / New Jersey",home:"France",away:"Senegal"},
+  {n:50,phase:"Lohkovaihe",group:"I",date:"16.06.2026",time:"18:00",venue:"Boston",home:"Iraq",away:"Norway"},
+  {n:51,phase:"Lohkovaihe",group:"I",date:"22.06.2026",time:"17:00",venue:"Philadelphia",home:"France",away:"Iraq"},
+  {n:52,phase:"Lohkovaihe",group:"I",date:"22.06.2026",time:"20:00",venue:"New York / New Jersey",home:"Norway",away:"Senegal"},
+  {n:53,phase:"Lohkovaihe",group:"I",date:"26.06.2026",time:"15:00",venue:"Boston",home:"Norway",away:"France"},
+  {n:54,phase:"Lohkovaihe",group:"I",date:"26.06.2026",time:"15:00",venue:"Toronto",home:"Senegal",away:"Iraq"},
+  // Lohkovaihe J
+  {n:55,phase:"Lohkovaihe",group:"J",date:"16.06.2026",time:"21:00",venue:"Kansas City",home:"Argentina",away:"Algeria"},
+  {n:56,phase:"Lohkovaihe",group:"J",date:"16.06.2026",time:"00:00",venue:"San Francisco Bay Area",home:"Austria",away:"Jordan"},
+  {n:57,phase:"Lohkovaihe",group:"J",date:"22.06.2026",time:"13:00",venue:"Dallas",home:"Argentina",away:"Austria"},
+  {n:58,phase:"Lohkovaihe",group:"J",date:"22.06.2026",time:"23:00",venue:"San Francisco Bay Area",home:"Jordan",away:"Algeria"},
+  {n:59,phase:"Lohkovaihe",group:"J",date:"27.06.2026",time:"22:00",venue:"Kansas City",home:"Algeria",away:"Austria"},
+  {n:60,phase:"Lohkovaihe",group:"J",date:"27.06.2026",time:"22:00",venue:"Dallas",home:"Jordan",away:"Argentina"},
+  // Lohkovaihe K
+  {n:61,phase:"Lohkovaihe",group:"K",date:"17.06.2026",time:"13:00",venue:"Houston",home:"Portugal",away:"Congo DR"},
+  {n:62,phase:"Lohkovaihe",group:"K",date:"17.06.2026",time:"22:00",venue:"Mexico City",home:"Uzbekistan",away:"Colombia"},
+  {n:63,phase:"Lohkovaihe",group:"K",date:"23.06.2026",time:"13:00",venue:"Houston",home:"Portugal",away:"Uzbekistan"},
+  {n:64,phase:"Lohkovaihe",group:"K",date:"23.06.2026",time:"22:00",venue:"Guadalajara",home:"Colombia",away:"Congo DR"},
+  {n:65,phase:"Lohkovaihe",group:"K",date:"27.06.2026",time:"19:30",venue:"Miami",home:"Colombia",away:"Portugal"},
+  {n:66,phase:"Lohkovaihe",group:"K",date:"27.06.2026",time:"19:30",venue:"Atlanta",home:"Congo DR",away:"Uzbekistan"},
+  // Lohkovaihe L
+  {n:67,phase:"Lohkovaihe",group:"L",date:"17.06.2026",time:"16:00",venue:"Dallas",home:"England",away:"Croatia"},
+  {n:68,phase:"Lohkovaihe",group:"L",date:"17.06.2026",time:"19:00",venue:"Toronto",home:"Ghana",away:"Panama"},
+  {n:69,phase:"Lohkovaihe",group:"L",date:"23.06.2026",time:"16:00",venue:"Boston",home:"England",away:"Ghana"},
+  {n:70,phase:"Lohkovaihe",group:"L",date:"23.06.2026",time:"19:00",venue:"Toronto",home:"Panama",away:"Croatia"},
+  {n:71,phase:"Lohkovaihe",group:"L",date:"27.06.2026",time:"17:00",venue:"New York / New Jersey",home:"Panama",away:"England"},
+  {n:72,phase:"Lohkovaihe",group:"L",date:"27.06.2026",time:"17:00",venue:"Philadelphia",home:"Croatia",away:"Ghana"},
+  // 32 parasta
+  {n:73,phase:"32 parasta",group:"",date:"28.06.2026",time:"15:00",venue:"Los Angeles",home:"2. Gr. A",away:"2. Gr. B"},
+  {n:74,phase:"32 parasta",group:"",date:"29.06.2026",time:"16:30",venue:"Boston",home:"1. Gr. E",away:"*"},
+  {n:75,phase:"32 parasta",group:"",date:"29.06.2026",time:"21:00",venue:"Monterrey",home:"1. Gr. F",away:"2. Gr. C"},
+  {n:76,phase:"32 parasta",group:"",date:"29.06.2026",time:"13:00",venue:"Houston",home:"1. Gr. C",away:"2. Gr. F"},
+  {n:77,phase:"32 parasta",group:"",date:"30.06.2026",time:"17:00",venue:"New York / New Jersey",home:"1. Gr. I",away:"*"},
+  {n:78,phase:"32 parasta",group:"",date:"30.06.2026",time:"13:00",venue:"Dallas",home:"2. Gr. E",away:"2. Gr. I"},
+  {n:79,phase:"32 parasta",group:"",date:"30.06.2026",time:"21:00",venue:"Mexico City",home:"1. Gr. A",away:"*"},
+  {n:80,phase:"32 parasta",group:"",date:"01.07.2026",time:"12:00",venue:"Atlanta",home:"1. Gr. L",away:"*"},
+  {n:81,phase:"32 parasta",group:"",date:"01.07.2026",time:"20:00",venue:"San Francisco Bay Area",home:"1. Gr. D",away:"*"},
+  {n:82,phase:"32 parasta",group:"",date:"01.07.2026",time:"16:00",venue:"Seattle",home:"1. Gr. G",away:"*"},
+  {n:83,phase:"32 parasta",group:"",date:"02.07.2026",time:"19:00",venue:"Toronto",home:"2. Gr. K",away:"2. Gr. L"},
+  {n:84,phase:"32 parasta",group:"",date:"02.07.2026",time:"15:00",venue:"Los Angeles",home:"1. Gr. H",away:"2. Gr. J"},
+  {n:85,phase:"32 parasta",group:"",date:"02.07.2026",time:"23:00",venue:"Vancouver",home:"1. Gr. B",away:"*"},
+  {n:86,phase:"32 parasta",group:"",date:"04.07.2026",time:"18:00",venue:"Miami",home:"1. Gr. J",away:"2. Gr. H"},
+  {n:87,phase:"32 parasta",group:"",date:"03.07.2026",time:"21:30",venue:"Kansas City",home:"1. Gr. K",away:"*"},
+  {n:88,phase:"32 parasta",group:"",date:"03.07.2026",time:"14:00",venue:"Dallas",home:"2. Gr. D",away:"2. Gr. G"},
+  // 16 parasta
+  {n:89,phase:"16 parasta",group:"",date:"04.07.2026",time:"17:00",venue:"Philadelphia",home:"Voittaja 74",away:"Voittaja 77"},
+  {n:90,phase:"16 parasta",group:"",date:"04.07.2026",time:"13:00",venue:"Houston",home:"Voittaja 73",away:"Voittaja 75"},
+  {n:91,phase:"16 parasta",group:"",date:"05.07.2026",time:"16:00",venue:"New York / New Jersey",home:"Voittaja 76",away:"Voittaja 78"},
+  {n:92,phase:"16 parasta",group:"",date:"05.07.2026",time:"20:00",venue:"Mexico City",home:"Voittaja 79",away:"Voittaja 80"},
+  {n:93,phase:"16 parasta",group:"",date:"06.07.2026",time:"15:00",venue:"Dallas",home:"Voittaja 83",away:"Voittaja 84"},
+  {n:94,phase:"16 parasta",group:"",date:"06.07.2026",time:"20:00",venue:"Seattle",home:"Voittaja 81",away:"Voittaja 82"},
+  {n:95,phase:"16 parasta",group:"",date:"07.07.2026",time:"12:00",venue:"Atlanta",home:"Voittaja 86",away:"Voittaja 88"},
+  {n:96,phase:"16 parasta",group:"",date:"07.07.2026",time:"16:00",venue:"Vancouver",home:"Voittaja 85",away:"Voittaja 87"},
+  // Puolivälierä
+  {n:97,phase:"Puolivälierä",group:"",date:"09.07.2026",time:"16:00",venue:"Boston",home:"Voittaja 89",away:"Voittaja 90"},
+  {n:98,phase:"Puolivälierä",group:"",date:"10.07.2026",time:"15:00",venue:"Los Angeles",home:"Voittaja 93",away:"Voittaja 94"},
+  {n:99,phase:"Puolivälierä",group:"",date:"11.07.2026",time:"17:00",venue:"Miami",home:"Voittaja 91",away:"Voittaja 92"},
+  {n:100,phase:"Puolivälierä",group:"",date:"11.07.2026",time:"21:00",venue:"Kansas City",home:"Voittaja 95",away:"Voittaja 96"},
+  // Välierä
+  {n:101,phase:"Välierä",group:"",date:"14.07.2026",time:"15:00",venue:"Dallas",home:"Voittaja 97",away:"Voittaja 98"},
+  {n:102,phase:"Välierä",group:"",date:"15.07.2026",time:"15:00",venue:"Atlanta",home:"Voittaja 99",away:"Voittaja 100"},
+  // Pronssiottelu & Finaali
+  {n:103,phase:"Pronssiottelu",group:"",date:"18.07.2026",time:"17:00",venue:"Miami",home:"Häviäjä 101",away:"Häviäjä 102"},
+  {n:104,phase:"Finaali",group:"",date:"19.07.2026",time:"15:00",venue:"New York / New Jersey",home:"Voittaja 101",away:"Voittaja 102"},
+];
+
+const PHASE_ORDER = ["Lohkovaihe","32 parasta","16 parasta","Puolivälierä","Välierä","Pronssiottelu","Finaali"];
+const PHASE_ICONS = {"Lohkovaihe":"⚽","32 parasta":"🔵","16 parasta":"⚡","Puolivälierä":"🔥","Välierä":"💥","Pronssiottelu":"🥉","Finaali":"🏆"};
+
+function buildForm() {
+  const form = document.getElementById('betForm');
+  const byPhase = {};
+  MATCHES.forEach(m => {
+    if (!byPhase[m.phase]) byPhase[m.phase] = {};
+    const g = m.group || '_';
+    if (!byPhase[m.phase][g]) byPhase[m.phase][g] = [];
+    byPhase[m.phase][g].push(m);
+  });
+
+  PHASE_ORDER.forEach(phase => {
+    if (!byPhase[phase]) return;
+    const phaseDiv = document.createElement('div');
+    phaseDiv.className = 'phase-block';
+    phaseDiv.innerHTML = `<div class="phase-title"><span style="font-size:1.3rem">${PHASE_ICONS[phase]||'🎯'}</span><h2>${phase}</h2></div>`;
+
+    const groups = byPhase[phase];
+    const groupKeys = Object.keys(groups).sort();
+    groupKeys.forEach(gk => {
+      const gDiv = document.createElement('div');
+      gDiv.className = 'group-block';
+      if (gk !== '_') gDiv.innerHTML = `<div class="group-label">Lohko ${gk}</div>`;
+      groups[gk].forEach(m => {
+        gDiv.innerHTML += `
+          <div class="match-card" id="card-${m.n}">
+            <div class="match-num">${m.n}</div>
+            <div class="match-info">
+              <div class="match-teams">
+                <span class="team-home">${m.home}</span>
+                <span class="vs">vs</span>
+                <span class="team-away">${m.away}</span>
+              </div>
+              <div class="match-meta">
+                <span>📅 ${m.date}</span>
+                <span>🕐 ${m.time}</span>
+                <span>📍 ${m.venue}</span>
+              </div>
+            </div>
+            <div class="bet-group">
+              <label class="bet-label">
+                <input type="radio" name="m${m.n}" value="1" onchange="onPick(${m.n},'1')">
+                <div class="bet-btn btn-1">1</div>
+              </label>
+              <label class="bet-label">
+                <input type="radio" name="m${m.n}" value="X" onchange="onPick(${m.n},'X')">
+                <div class="bet-btn btn-X">X</div>
+              </label>
+              <label class="bet-label">
+                <input type="radio" name="m${m.n}" value="2" onchange="onPick(${m.n},'2')">
+                <div class="bet-btn btn-2">2</div>
+              </label>
+            </div>
+          </div>`;
+      });
+      phaseDiv.appendChild(gDiv);
+    });
+    form.appendChild(phaseDiv);
+  });
+}
+
+function onPick(n, val) {
+  const card = document.getElementById('card-' + n);
+  card.className = 'match-card picked picked-' + val;
+  updateProgress();
+}
+
+function updateProgress() {
+  let count = 0;
+  MATCHES.forEach(m => {
+    if (document.querySelector(`input[name="m${m.n}"]:checked`)) count++;
+  });
+  document.getElementById('progressInfo').textContent = count + ' / 104 veikkausta tehty';
+  document.getElementById('progressFill').style.width = (count / 104 * 100) + '%';
+}
+
+function openPreview() {
+  const name = document.getElementById('playerName').value.trim() || '–';
+  document.getElementById('previewName').textContent = name;
+  const tbody = document.getElementById('previewBody');
+  tbody.innerHTML = '';
+  MATCHES.forEach(m => {
+    const picked = document.querySelector(`input[name="m${m.n}"]:checked`);
+    const val = picked ? picked.value : null;
+    const pickHtml = val
+      ? `<span class="preview-pick pick-${val}">${val}</span>`
+      : `<span class="pick-none">–</span>`;
+    tbody.innerHTML += `<tr>
+      <td>${m.n}</td>
+      <td>${m.home} vs ${m.away}</td>
+      <td>${m.date}</td>
+      <td>${pickHtml}</td>
+    </tr>`;
+  });
+  document.getElementById('previewModal').classList.add('open');
+}
+
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('open');
+}
+
+async function submitForm() {
+  const name = document.getElementById('playerName').value.trim();
+  if (!name) { alert('Kirjoita ensin nimesi!'); document.getElementById('playerName').focus(); return; }
+  let missing = 0;
+  MATCHES.forEach(m => { if (!document.querySelector(`input[name="m${m.n}"]:checked`)) missing++; });
+  if (missing > 0) {
+    if (!confirm(`Sinulla on ${missing} veikkausta tekemättä. Haluatko silti lähettää?`)) return;
+  }
+
+  const picks = MATCHES.map(m => {
+    const checked = document.querySelector(`input[name="m${m.n}"]:checked`);
+    return { n: m.n, home: m.home, away: m.away, pick: checked ? checked.value : "" };
+  });
+
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvHYy5Gp-37o1sBKo3MNv5jKXH5LMJ1qce6W_B-9ruftwQuhfoV3bybUi7NJ_qE8p6/exec";
+
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = 'Lähetetään…';
+  btn.disabled = true;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ name, picks }),
+      headers: { "Content-Type": "text/plain" }
+    });
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('actionBar').style.display = 'none';
+    document.getElementById('submittedName').textContent = name + ' – kiitos veikkauksistasi!';
+    document.getElementById('submittedView').classList.add('show');
+  } catch(err) {
+    alert('Lähetys epäonnistui, yritä uudelleen.');
+    btn.textContent = 'Lähetä veikkaukset';
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('previewModal').addEventListener('click', function(e) {
+  if (e.target === this) closePreview();
+});
+
+buildForm();
+</script>
+</body>
+</html>
