@@ -656,7 +656,7 @@ async function submitForm() {
     return { n: m.n, home: m.home, away: m.away, pick: checked ? checked.value : "" };
   });
 
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvHYy5Gp-37o1sBKo3MNv5jKXH5LMJ1qce6W_B-9ruftwQuhfoV3bybUi7NJ_qE8p6/exec";
+  const SCRIPT_URL = "https://formspree.io/f/SINUN_FORM_ID";
 
   const btn = document.querySelector('.btn-submit');
   btn.textContent = 'Lähetetään…';
@@ -666,7 +666,7 @@ async function submitForm() {
     await fetch(SCRIPT_URL, {
       method: "POST",
       body: JSON.stringify({ name, picks }),
-      headers: { "Content-Type": "text/plain" }
+      headers: { "Content-Type": "application/json" }
     });
     document.getElementById('formView').style.display = 'none';
     document.getElementById('actionBar').style.display = 'none';
